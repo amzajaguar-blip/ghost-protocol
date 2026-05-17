@@ -34,7 +34,7 @@ jobs:
           path: .next/
           retention-days: 7
 
-  # ── APK Generation via PWA/TWA ──────────────────────────
+  # ── APK Generation via PWA/TWA (Bubblewrap) ────────────
   apk:
     needs: build
     runs-on: ubuntu-latest
@@ -53,19 +53,46 @@ jobs:
       - name: Install Bubblewrap CLI
         run: npm install -g @bubblewrap/cli
 
-      - name: Generate TWA APK
+      - name: Generate keystore
+        run: |
+          cd twa
+          if [ ! -f android.keystore ]; then
+            keytool -genkey -v \
+              -keystore android.keystore \
+              -alias ghost-protocol \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass android \
+              -keypass android \
+              -dname "CN=Ghost Protocol, OU=Dev, O=Ghost Protocol, L=Milan, ST=Italy, C=IT"
+          fi
+
+      - name: Initialize TWA project
         env:
           SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
           cd twa
-          # Initialize TWA project
-          bubblewrap init --manifest="$SITE_URL/manifest.json" || true
-          # Build APK
-          bubblewrap build
+          # bubblewrap init fetches the PWA manifest from the live site
+          # and creates a TWA project directory
+          bubblewrap init --manifest="$SITE_URL/manifest.json" --directory=./twa-build 2>&1 || {
+            echo "⚠ bubblewrap init failed — site may not be deployed yet"
+            echo "Creating fallback project from local twa-manifest.json"
+            mkdir -p twa-build
+            cp twa-manifest.json twa-build/
+          }
+
+      - name: Build APK
+        run: |
+          cd twa/twa-build
+          bubblewrap build 2>&1 || {
+            echo "⚠ APK build failed — see logs above"
+            exit 1
+          }
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ghost-protocol-apk
-          path: twa/*.apk
+          path: twa/twa-build/*.apk
           retention-days: 30

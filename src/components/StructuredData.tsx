@@ -7,6 +7,30 @@
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ghost-protocol.app'
 
+/**
+ * Escape user-generated strings for safe embedding inside <script type="application/ld+json">.
+ *
+ * JSON.stringify alone does NOT prevent XSS: if user text contains "</script>",
+ * the browser's HTML parser closes the script tag early, allowing arbitrary JS injection.
+ *
+ * We replace:
+ *   - "</" → "<\/"   (prevents script-tag breakout)
+ *   - "<!--" → "<\!--" (prevents HTML comment injection)
+ *   - "]]>" → "]]&gt;"  (prevents CDATA breakout in XML/XHTML contexts)
+ */
+function safeScriptJSON(obj: unknown): string {
+  return JSON.stringify(obj).replace(
+    /<\/(script)/gi,
+    '<\\/$1'
+  ).replace(
+    /<!--/g,
+    '<\\!--'
+  ).replace(
+    /]]>/g,
+    ']]&gt;'
+  )
+}
+
 // ── WebApplication (site-wide) ──────────────────────────────
 
 export function WebsiteSchema() {
@@ -45,7 +69,7 @@ export function WebsiteSchema() {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: safeScriptJSON(jsonLd) }}
     />
   )
 }
@@ -120,7 +144,7 @@ export function MomentSchema({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: safeScriptJSON(jsonLd) }}
     />
   )
 }

@@ -11,6 +11,7 @@ interface FeedProps {
 export default function Feed({ initialMoments }: FeedProps) {
   const [moments, setMoments] = useState<Moment[]>(initialMoments)
   const [loading, setLoading] = useState(false)
+  const [error,   setError]   = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(initialMoments.length >= 10)
   const [seenIds] = useState<Set<string>>(() => new Set(initialMoments.map(m => m.id)))
@@ -18,6 +19,7 @@ export default function Feed({ initialMoments }: FeedProps) {
   const loadMore = async () => {
     if (loading) return
     setLoading(true)
+    setError(null)
     const nextPage = page + 1
 
     try {
@@ -25,6 +27,10 @@ export default function Feed({ initialMoments }: FeedProps) {
         headers: { 'x-anti-csrf': '1' },
       })
       const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error ?? 'Errore di rete')
+      }
 
       if (data.moments?.length > 0) {
         // Dedup: skip moments already in the feed
@@ -38,7 +44,7 @@ export default function Feed({ initialMoments }: FeedProps) {
       }
       setHasMore(data.hasMore ?? false)
     } catch (err) {
-      console.error('loadMore error:', err)
+      setError(err instanceof Error ? err.message : 'Errore di caricamento')
     } finally {
       setLoading(false)
     }
@@ -79,7 +85,15 @@ export default function Feed({ initialMoments }: FeedProps) {
 
       {/* Load more */}
       {hasMore && (
-        <div className="mt-12 pb-10 flex justify-center">
+        <div className="mt-12 pb-10 flex flex-col items-center gap-3">
+          {error && (
+            <p className="text-vote-no text-xs text-center" style={{ fontFamily: 'DM Mono, monospace' }}>
+              {error} —{' '}
+              <button onClick={loadMore} className="underline hover:text-text transition-colors">
+                riprova
+              </button>
+            </p>
+          )}
           <button
             onClick={loadMore}
             disabled={loading}
@@ -90,6 +104,8 @@ export default function Feed({ initialMoments }: FeedProps) {
                 <span className="spinner" />
                 Caricamento...
               </>
+            ) : error ? (
+              'Riprova'
             ) : (
               'Carica altri momenti'
             )}

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Analytics() {
   // Analytics are deferred until cookie consent is granted.
@@ -9,12 +9,18 @@ export default function Analytics() {
   //   NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX
   //   NEXT_PUBLIC_META_PIXEL_ID=XXXXXXXXXXXXXXX
 
+  const [consented, setConsented] = useState(false)
+
+  useEffect(() => {
+    try {
+      setConsented(localStorage.getItem('cookie_consent') === 'accepted')
+    } catch { /* localStorage blocked */ }
+  }, [])
+
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID
-  const hasConsent = typeof window !== 'undefined'
-    && localStorage.getItem('cookie_consent') === 'accepted'
 
-  if (!hasConsent || (!ga4Id && !pixelId)) return null
+  if (!consented || (!ga4Id && !pixelId)) return null
 
   return (
     <>

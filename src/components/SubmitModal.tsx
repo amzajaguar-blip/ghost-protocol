@@ -62,6 +62,7 @@ export default function SubmitModal({ onClose, onSubmit }: SubmitModalProps) {
   const fileRef     = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const sheetRef    = useRef<HTMLDivElement>(null)
+  const cooldownRef = useRef<ReturnType<typeof setTimeout>>()
 
   // Focus trap
   useFocusTrap(sheetRef, true)
@@ -98,9 +99,12 @@ export default function SubmitModal({ onClose, onSubmit }: SubmitModalProps) {
     if (fileRef.current) fileRef.current.value = ''
   }
 
-  // Cleanup ObjectURL on unmount
+  // Cleanup ObjectURL + cooldown on unmount
   useEffect(() => {
-    return () => { if (imagePreview) URL.revokeObjectURL(imagePreview) }
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview)
+      clearTimeout(cooldownRef.current)
+    }
   }, [imagePreview])
 
   const handleSubmit = async () => {
@@ -131,7 +135,7 @@ export default function SubmitModal({ onClose, onSubmit }: SubmitModalProps) {
 
       // Cooldown after successful submission
       setCooldown(true)
-      setTimeout(() => setCooldown(false), 30_000)
+      cooldownRef.current = setTimeout(() => setCooldown(false), 30_000)
 
       onSubmit()
     } catch {

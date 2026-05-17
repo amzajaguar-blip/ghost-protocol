@@ -4,7 +4,8 @@ import { checkGlobalLimit, checkPostLimit } from '@/lib/rate-limit'
 
 // GET /api/moments?page=1&limit=10
 export async function GET(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
+  // Prefer x-real-ip (set by trusted reverse proxy) over x-forwarded-for (spoofable)
+  const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for') ?? 'unknown'
   const glCheck = checkGlobalLimit(ip)
   if (!glCheck.allowed) {
     return NextResponse.json({ error: 'Troppe richieste' }, { status: 429 })
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/moments  (multipart/form-data or application/json)
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
+  const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for') ?? 'unknown'
   const postCheck = checkPostLimit(ip)
   if (!postCheck.allowed) {
     return NextResponse.json({ error: 'Troppe richieste. Riprova tra qualche secondo.' }, { status: 429 })
@@ -69,6 +70,31 @@ export async function POST(req: NextRequest) {
       const ext = (image.name.split('.').pop() ?? '').toLowerCase()
       if (!ALLOWED_EXTENSIONS.has(ext)) {
         return NextResponse.json({ error: 'Formato immagine non supportato. Usa JPG, PNG, WebP o GIF.' }, { status: 400 })
+      }
+
+      // Magic byte validation — prevent SVG/HTML polyglots disguised as .jpg etc.
+      const buf = await image.arrayBuffer()
+      const header = Array.from(new Uint8Array(buf.slice(0, 12)))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+        .toUpperCase()
+
+      const MAGIC_SIGNATURES: Record<string, string[]> = {
+        jpg:  ['FFD8FF'],
+        jpeg: ['FFD8FF'],
+        png:  ['89504E47'],
+        gif:  ['47494638'],
+        webp: ['52494646'], // RIFF header — further validated below
+      }
+
+      const expected = MAGIC_SIGNATURES[ext]
+      if (!expected || !expected.some(sig => header.startsWith(sig))) {
+        return NextResponse.json({ error: 'Tipo di file non valido. Il contenuto non corrisponde all\'estensione.' }, { status: 400 })
+      }
+
+      // WebP: require WEBP subtype at bytes 8-11
+      if (ext === 'webp' && header.slice(16, 24) !== '57454250') {
+        return NextResponse.json({ error: 'File WebP non valido.' }, { status: 400 })
       }
 
       // Safe filename — never trust client filename

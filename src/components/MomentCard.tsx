@@ -115,8 +115,10 @@ export default function MomentCard({ moment, animationDelay = 0 }: MomentCardPro
         setNoCount(data.no_count)
       }
 
+      // If the vote was a duplicate (alreadyVoted), use the previous vote
+      // so the UI correctly reflects what the user actually voted
       markVoted(moment.id)
-      setMyVote(vote)
+      setMyVote(data.alreadyVoted && data.previousVote !== undefined ? data.previousVote : vote)
       setVoted(true)
       setTimeout(() => setRevealed(true), 80)
     } catch (err) {

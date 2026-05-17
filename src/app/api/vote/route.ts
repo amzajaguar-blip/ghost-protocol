@@ -6,7 +6,7 @@ import { checkPostLimit, checkVoteLimit } from '@/lib/rate-limit'
 // Body: { moment_id: string, vote: boolean, fingerprint: string }
 export async function POST(req: NextRequest) {
   // ── Rate limiting ──────────────────────────────────────
-  const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? 'unknown'
+  const ip = req.headers.get('x-real-ip') ?? req.headers.get('x-forwarded-for') ?? 'unknown'
   const postCheck = checkPostLimit(ip)
   if (!postCheck.allowed) {
     return NextResponse.json({ error: 'Troppe richieste. Riprova tra qualche secondo.' }, { status: 429 })

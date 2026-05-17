@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function CookieBanner() {
   const [show, setShow] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const consent = localStorage.getItem('cookie_consent')
@@ -15,8 +17,8 @@ export default function CookieBanner() {
   const accept = () => {
     localStorage.setItem('cookie_consent', 'accepted')
     setShow(false)
-    // Reload to activate analytics
-    window.location.reload()
+    // Soft refresh to activate analytics without full page reload
+    router.refresh()
   }
 
   const decline = () => {

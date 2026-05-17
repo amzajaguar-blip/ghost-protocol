@@ -73,16 +73,7 @@ export function createSupabaseServerClient() {
   )
 }
 
-// ── Admin (service role) — ONLY for operations that truly need RLS bypass ──
-export function createSupabaseAdminClient() {
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    }
-  )
-}
+// NOTE: Service-role admin client intentionally not exported.
+// The anon key + RLS policies handle all current use cases.
+// If admin operations are needed in future, create a dedicated
+// internal API route with its own scoped admin client.

@@ -11,6 +11,7 @@ interface Bucket {
   lastRefill: number
 }
 
+const MAX_ENTRIES = 100_000 // Hard cap to prevent memory exhaustion
 const buckets = new Map<string, Bucket>()
 
 // Cleanup old entries every 5 minutes
@@ -28,6 +29,11 @@ function getBucket(key: string, maxTokens: number, refillRate: number): Bucket {
   const now = Date.now()
 
   if (!bucket) {
+    // Enforce hard cap to prevent memory exhaustion from spoofed IPs/fingerprints
+    if (buckets.size >= MAX_ENTRIES) {
+      // Return an empty-bucket singleton — effectively rate-limits all new entries
+      return { tokens: 0, lastRefill: now }
+    }
     bucket = { tokens: maxTokens, lastRefill: now }
     buckets.set(key, bucket)
     return bucket
