@@ -1,0 +1,27 @@
+{
+  "packageName": "app.ghostprotocol.twa",
+  "host": "ghost-protocol.app",
+  "name": "Ghost Protocol",
+  "shortName": "Ghost",
+  "display": "standalone",
+  "themeColor": "#08080A",
+  "backgroundColor": "#08080A",
+  "startUrl": "/",
+  "iconUrl": "https://ghost-protocol.app/icon-512.png",
+  "maskableIconUrl": "https://ghost-protocol.app/icon-512.png",
+  "monochromeIconUrl": "https://ghost-protocol.app/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "ghost-protocol"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "fallbackType": "customtabs",
+  "enableSiteSettingsShortcut": true,
+  "orientation": "portrait-primary",
+  "features": {
+    "playBilling": false,
+    "locationDelegation": false
+  }
+}

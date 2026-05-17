@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Fonts are loaded via <link> in layout.tsx.
+ * Migrate to next/font for optimal LCP.
+ */
+
+/* ── Reset ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: #08080A;
+  color: #F4F4F5;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Reduced motion ─────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-fade-in,
+  .animate-reveal,
+  .animate-modal-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .vote-bar { transition: none !important; }
+}
+
+/* ── Grain texture overlay ──────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 300px;
+}
+
+/* ── Scrollbar ──────────────────────────── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #08080A; }
+::-webkit-scrollbar-thumb { background: #333338; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #FF3C5F; }
+
+/* ── Selection ──────────────────────────── */
+::selection {
+  background: rgba(255, 60, 95, 0.25);
+  color: #F4F4F5;
+}
+
+/* ── Card hover ─────────────────────────── */
+.card-glow {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+}
+.card-glow:hover {
+  border-color: rgba(255, 60, 95, 0.25) !important;
+  box-shadow: 0 0 40px rgba(255, 60, 95, 0.06), 0 4px 24px rgba(0,0,0,0.4);
+  transform: translateY(-1px);
+}
+
+/* ── Vote bar ───────────────────────────── */
+.vote-bar {
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Spinner ────────────────────────────── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Skeleton loader ────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #111116 25%, #1c1c24 50%, #111116 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Backdrop blur for modal ────────────── */
+.modal-backdrop {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Focus visible ───────────────────────── */
+*:focus-visible {
+  outline: 2px solid rgba(255, 60, 95, 0.6);
+  outline-offset: 2px;
+}
+
+/* ── Mobile performance ─────────────────── */
+@media (max-width: 640px) {
+  header {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}

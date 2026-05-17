@@ -1,0 +1,42 @@
+# Node.js
+node_modules/
+.next/
+out/
+
+# Environment
+.env.local
+.env*.local
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Supabase
+supabase/.branches/
+supabase/.temp/
+
+# Build artifacts
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# Qwen
+.qwen/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TWA
+twa/android/
+twa/*.apk
+twa/*.aab
+twa/*.keystore
+twa/*.pepk
