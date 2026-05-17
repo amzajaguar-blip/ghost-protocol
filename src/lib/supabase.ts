@@ -25,17 +25,20 @@ type Database = {
         Row: Moment
         Insert: { text: string; image_url?: string | null }
         Update: Partial<Moment>
+        Relationships: []
       }
       votes: {
         Row: Vote
         Insert: { moment_id: string; fingerprint: string; vote: boolean }
         Update: Partial<Vote>
+        Relationships: []
       }
     }
+    Views: Record<string, never>
     Functions: {
       increment_vote: {
         Args: { moment_id: string; is_yes: boolean }
-        Returns: void
+        Returns: unknown
       }
       cast_vote: {
         Args: { p_moment_id: string; p_fingerprint: string; p_vote: boolean }

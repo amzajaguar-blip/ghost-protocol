@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
 
   const { data, error } = await supabase
     .from('moments')
-    .insert({ text, image_url })
+    .insert({ text, image_url: image_url ?? undefined })
     .select()
     .single()
 

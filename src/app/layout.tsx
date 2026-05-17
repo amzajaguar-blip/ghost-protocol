@@ -1,8 +1,15 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { WebsiteSchema } from '@/components/StructuredData'
 import './globals.css'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ghost-protocol.app'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#08080A',
+}
 
 export const metadata: Metadata = {
   // ── Critical: absolute base for all relative URLs ────────
@@ -28,14 +35,6 @@ export const metadata: Metadata = {
     'max-snippet': -1,
     'max-image-preview': 'large',
     'max-video-preview': -1,
-  },
-
-  // ── Viewport (PWA) ───────────────────────────────────────
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 5,
-    themeColor: '#08080A',
   },
 
   // ── Open Graph ───────────────────────────────────────────
